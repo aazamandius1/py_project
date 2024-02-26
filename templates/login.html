@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>{{the_title}}</h2>
+
+<form method="POST" action="/entry">
+<p>Introduce yourself</p>
+<input name='login' type="text" width="60">
+<p><input value='Log in' type='SUBMIT'></p>
+</form>
+
+{% endblock %}

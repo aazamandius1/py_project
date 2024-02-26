@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>{{the_title}}</h2>
+<h3>Hello {{the_username}}</h3>
+
+<form method="POST" action="/todolist">
+<p>Use this form to submit a to-do into list</p>
+<input name='task' type="text" width="60">
+<p><input value='Do it!' type='SUBMIT'></p>
+</form>
+
+<table>
+    <tr>
+        {% for row_title in the_row_titles %}
+            <th>{{row_title}}</th>
+        {% endfor %}    
+    </tr>
+    {% for list_row in the_list %}
+        <tr>
+            {%for item in list_row %}
+                <td>{{item}}</td>
+            {% endfor %}    
+        </tr>
+    {% endfor %}    
+</table>
+
+{% endblock %}
