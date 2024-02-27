@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, jsonify
 from DBcm import UseDatabase
 from datetime import datetime
 
@@ -19,8 +19,8 @@ def greet() -> 'html':
     username = request.form['login']
     app.config['username'] = username
     
-    list = show_todos([username])
-    titles = ('Todo', 'created', 'done')
+    list = show_todos(username)
+    titles = ('id','Todo', 'created', 'done')
     return render_template('entry.html', 
                             the_row_titles = titles,
                             the_username = username, 
@@ -33,7 +33,7 @@ def add_task() -> 'html':
     username = app.config['username']
     post_todo(username, to_do)
     list = show_todos(username)
-    titles = ('Todo', 'created', 'done', '    ')
+    titles = ('ID','Todo', 'created', 'done')
     return render_template('entry.html', 
                             the_row_titles = titles,
                             the_username = username, 
@@ -54,16 +54,19 @@ def post_todo(username, to_do):
 
 def show_todos(username) -> list:
         with UseDatabase(app.config['dbconfig']) as cursor:
-            _SQL = """select todo_text, created, done from todos where user = %s"""
+            _SQL = """select id, todo_text, created, done from todos where user = %s"""
             cursor.execute(_SQL, (username,))
             to_do_list = cursor.fetchall()
             return to_do_list
 
-def make_todo_done(username, id):
-    #code here plz
-
-    pass
-
+@app.route('/markdone', methods=['POST','GET'])
+def make_todo_done():
+    data = request.get_json()
+    id = data.get('id')
+    with UseDatabase(app.config['dbconfig']) as cursor:
+        _SQL = """UPDATE todos SET done=%s where id=%s"""
+        cursor.execute(_SQL, (str(datetime.now())[:-7], id))
+    return jsonify('The thig was done')
 
 
 
