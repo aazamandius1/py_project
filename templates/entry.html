@@ -5,33 +5,62 @@
 <h2>{{the_title}}</h2>
 <h3>Hello {{the_username}}</h3>
 
-<form method="POST" action="/todolist">
 <p>Use this form to submit a to-do into list</p>
-<input name='task' type="text" width="60">
-<p><input value='Do it!' type='SUBMIT'></p>
-</form>
+<input id="todo"  type="text" width="60"> <button id="add_todo_btn">Add task</button> 
 
-<p>Test send task field</p>
-<input id="todo"  type="text" width="60">
-<button id="fetch_todo">Add task</button>
-<div id="result2"></div>
-
-<table>
-    <tr>
-        {% for row_title in the_row_titles %}
-            <th>{{row_title}}</th>
-        {% endfor %}    
-    </tr>
-    {% for list_row in the_list %}
+<div id="data-table">
+    <table id="todo-table">
         <tr>
-            {%for item in list_row %}
-                <td>{{item}}</td>
-            {% endfor %}    
+            <th>ID</th>
+            <th>Task</th>
+            <th>Created</th>
+            <th>Done</th>
         </tr>
-    {% endfor %}    
-</table>
-<input id="todo_to_mark_as_done"  type="number" width="20">
-<button id="fetchdata">Mark as done</button>
-<div id="result"></div>
+        <!-- Table rows will be added here dynamically -->
+    </table>    
+</div>
+
+<script>
+        // Define the populateTable function here
+        function populateTable(data) {
+        const table = document.getElementById('todo-table');
+        table.querySelector('tbody').innerHTML = '';
+        data.forEach(item => {
+            const row = table.insertRow();
+            row.insertCell(0).innerText = item[0]; // ID
+            row.insertCell(1).innerText = item[1]; // Task
+            row.insertCell(2).innerText = item[2]; // Created
+            row.insertCell(3).innerText = item[3]; // Done
+
+            if (!item[3]) { // Assuming item[3] is the "Done" column
+                const doneButton = document.createElement('button');
+                doneButton.innerText = 'Mark as done';
+                doneButton.addEventListener('click', function() {
+                    markTaskAsDone(item[0]); // Assuming item[0] is the task ID
+                });
+                row.insertCell(3).appendChild(doneButton);
+            }
+        });
+    }
+        // Function to mark a task as done
+        async function markTaskAsDone(taskId) {
+        const data = {id: taskId};
+        try {
+            const res = await fetch("/markdone", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json;charset=utf-8'},
+                body: JSON.stringify(data)
+            });
+            const jsonResult = await res.json();
+            populateTable(jsonResult); // Re-populate the table with the updated data
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // Assuming the_list is passed to the template as a JSON string
+    const initialData = {{ the_list|tojson }};
+    populateTable(initialData);
+</script>
 
 {% endblock %}
