@@ -1,13 +1,8 @@
-from flask import Flask, render_template, request, session, jsonify
-from DBcm import UseDatabase
-from datetime import datetime
+from flask import Flask, render_template, request, session, jsonify, redirect
+from DBcm import UseDatabase, show_todos, post_todo, make_todo_done
+
 
 app = Flask(__name__)
-app.config['dbconfig'] = { 'host': '127.0.0.1',
-                           'user': 'dbuser',
-                           'password': 'password111',
-                           'database': 'todolistDB',}
-
 
 @app.route('/', methods=['POST','GET'])
 def login() -> 'html':
@@ -29,9 +24,9 @@ def greet() -> 'html':
 
 @app.route('/todolist', methods=['POST','GET'])
 def add_task() -> 'html':
-    to_do = request.form['task']
+#    to_do = request.form['task']
     username = app.config['username']
-    post_todo(username, to_do)
+#    post_todo(username, to_do)
     list = show_todos(username)
     titles = ('ID','Todo', 'created', 'done')
     return render_template('entry.html', 
@@ -40,33 +35,20 @@ def add_task() -> 'html':
                             the_list = list, 
                             the_title = 'To do list')
 
-
-
-def post_todo(username, to_do):
-        with UseDatabase(app.config['dbconfig']) as cursor:
-            _SQL = """INSERT INTO todos
-                      (user, todo_text, created) 
-                      values 
-                      (%s, %s, %s)"""
-            cursor.execute(_SQL, (username,
-                                  to_do,
-                                  str(datetime.now())[:-7],))
-
-def show_todos(username) -> list:
-        with UseDatabase(app.config['dbconfig']) as cursor:
-            _SQL = """select id, todo_text, created, done from todos where user = %s"""
-            cursor.execute(_SQL, (username,))
-            to_do_list = cursor.fetchall()
-            return to_do_list
+@app.route('/add_todo', methods=['POST','GET'])
+def add_task_to_db():
+    username = app.config['username']
+    data = request.get_json()
+    to_do = data.get('todo')
+    post_todo(username, to_do)
+    return jsonify(show_todos(username))
 
 @app.route('/markdone', methods=['POST','GET'])
-def make_todo_done():
+def mark_todo_as_done():
     data = request.get_json()
     id = data.get('id')
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        _SQL = """UPDATE todos SET done=%s where id=%s"""
-        cursor.execute(_SQL, (str(datetime.now())[:-7], id))
-    return jsonify('The thig was done')
+    make_todo_done(id)
+    return jsonify(f'The todo {id} was marked as done')
 
 
 

@@ -11,6 +11,24 @@
         
         {% endblock %}
         <script>
+            const result2 = document.querySelector("#result2");
+            const fetchToDoBtn = document.querySelector("#fetch_todo");
+            async function create_new_todo() {
+              const todo_text = document.getElementById('todo').value;
+              const data = {todo: todo_text}
+              try {
+                const res = await fetch("/add_todo", {
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/json;charset=utf-8'},
+                                        body: JSON.stringify(data)
+                                        });
+                const jsonResult = await res.json();
+                result2.innerText = JSON.stringify(jsonResult, null, 2);
+              } catch (error) {
+                console.log(error);
+              }
+            }
+
             const fetchDataBtn = document.querySelector("#fetchdata");
             const result = document.querySelector("#result");
             // gets data from API and sets the content of #result div
@@ -33,6 +51,7 @@
             
             // add event listener for #fetchdata button
             fetchDataBtn.addEventListener("click", getData);
+            fetchToDoBtn.addEventListener("click", create_new_todo);
             </script>
 
     </body>
