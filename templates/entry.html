@@ -19,48 +19,7 @@
         <!-- Table rows will be added here dynamically -->
     </table>    
 </div>
-
-<script>
-        // Define the populateTable function here
-        function populateTable(data) {
-        const table = document.getElementById('todo-table');
-        table.querySelector('tbody').innerHTML = '';
-        data.forEach(item => {
-            const row = table.insertRow();
-            row.insertCell(0).innerText = item[0]; // ID
-            row.insertCell(1).innerText = item[1]; // Task
-            row.insertCell(2).innerText = item[2]; // Created
-            row.insertCell(3).innerText = item[3]; // Done
-
-            if (!item[3]) { // Assuming item[3] is the "Done" column
-                const doneButton = document.createElement('button');
-                doneButton.innerText = 'Mark as done';
-                doneButton.addEventListener('click', function() {
-                    markTaskAsDone(item[0]); // Assuming item[0] is the task ID
-                });
-                row.insertCell(3).appendChild(doneButton);
-            }
-        });
-    }
-        // Function to mark a task as done
-        async function markTaskAsDone(taskId) {
-        const data = {id: taskId};
-        try {
-            const res = await fetch("/markdone", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json;charset=utf-8'},
-                body: JSON.stringify(data)
-            });
-            const jsonResult = await res.json();
-            populateTable(jsonResult); // Re-populate the table with the updated data
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    // Assuming the_list is passed to the template as a JSON string
-    const initialData = {{ the_list|tojson }};
-    populateTable(initialData);
-</script>
+<div id='initialData' data-initial-data='{{ the_list|tojson }}'>
+</div>
 
 {% endblock %}
