@@ -51,16 +51,23 @@ def delete_todo(id) -> None:
 
 def add_tags(tags_string, id) -> None:
     with UseDatabase(dbconfig) as cursor:
+        # Normalize tags
+        tags = [tag.strip().lower() for tag in tags_string.split(',')]
+        tags = list(set(tags)) # Remove duplicates
+        #check for existing tags
         _SQL = """SELECT tags FROM todos where id=%s"""
         cursor.execute(_SQL, (id,))
         current_tags = cursor.fetchall()
-        print(current_tags)
+
         if not current_tags or current_tags[0][0] is None:
-            updated_tags = tags_string
-        else:    
-            updated_tags = current_tags[0][0].split(',')
-            updated_tags.append(tags_string)
+            #if no tags exist, insert new tags
+            new_tags = ','.join(tags)
+            _SQL = """UPDATE todos SET tags=%s WHERE id=%s"""
+            cursor.execute(_SQL, (new_tags, id))
+        else:
+            #if there are tags, merge new whith existing and remuve duplicates
+            existing_tags = set(current_tags[0][0].split(','))
+            updated_tags = existing_tags.union(tags)
             updated_tags = ','.join(updated_tags)
-        print(updated_tags)
-        _SQL = """UPDATE todos SET tags=%s where id=%s"""
-        cursor.execute(_SQL, ( updated_tags, id))
+            _SQL = """UPDATE todos SET tags=%s where id=%s"""
+            cursor.execute(_SQL, ( updated_tags, id))

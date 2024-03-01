@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!item[5]) { // Assuming item[5] is the "tags" column
                 const addTagsButton = document.createElement('button');
                 const tagsInputField = document.createElement('input', );
-
                 tagsInputField.id = 'tagsInputField' + item[0]
                 row.insertCell(5).appendChild(tagsInputField);
                 row.insertCell(6).appendChild(addTagsButton);
@@ -78,8 +77,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to add tags to task
     async function addTagsToTodo(tags_text, taskId) {
+    //validate tags input 
+        const tags = tags_text.split(',').map(tag=>tag.trim());
+        const uniqueTags = tags.filter((tag, index, self) =>
+            tag.length > 0 && index === self.findIndex((t) => (
+                t.toLowerCase() === tag.toLowerCase()
+            ))
+        );
+
+        if (uniqueTags.length === 0) {
+            alert('Please enter at least one valid tag, or several, separated by comas.');
+            return; // Exit the function if no valid tags
+        }
+
+        const validatedTagsString = uniqueTags.join(', ');
+    
+    
     const data = {id: taskId,
-                  tags_string: tags_text };
+                  tags_string: validatedTagsString };
     try {
         const res = await fetch("/addtags", {
             method: 'POST',
@@ -122,4 +137,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(error);
             }
         }
+
 });
