@@ -10,13 +10,19 @@
 
 <div id="data-table">
     <table id="todo-table">
-        <tr>
-            <th>ID</th>
-            <th>Task</th>
-            <th>Created</th>
-            <th>Done</th>
-        </tr>
-        <!-- Table rows will be added here dynamically -->
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Task</th>
+                <th>Created</th>
+                <th>Done</th>
+                <th>Delete</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be added here dynamically -->
+        </tbody>
     </table>    
 </div>
 <div id='initialData' data-initial-data='{{ the_list|tojson }}'>

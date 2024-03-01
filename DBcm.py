@@ -24,7 +24,7 @@ class UseDatabase:
         
 def show_todos(username) -> list:
         with UseDatabase(dbconfig) as cursor:
-            _SQL = """select id, todo_text, created, done from todos where user = %s"""
+            _SQL = """SELECT id, todo_text, created, done, tags from todos where user = %s"""
             cursor.execute(_SQL, (username,))
             to_do_list = cursor.fetchall()
             return to_do_list
@@ -43,3 +43,24 @@ def make_todo_done(id) -> None:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """UPDATE todos SET done=%s where id=%s"""
         cursor.execute(_SQL, (str(datetime.now())[:-7], id))
+
+def delete_todo(id) -> None:
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """DELETE FROM todos WHERE id=%s"""
+        cursor.execute(_SQL, (id,))        
+
+def add_tags(tags_string, id) -> None:
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """SELECT tags FROM todos where id=%s"""
+        cursor.execute(_SQL, (id,))
+        current_tags = cursor.fetchall()
+        print(current_tags)
+        if not current_tags or current_tags[0][0] is None:
+            updated_tags = tags_string
+        else:    
+            updated_tags = current_tags[0][0].split(',')
+            updated_tags.append(tags_string)
+            updated_tags = ','.join(updated_tags)
+        print(updated_tags)
+        _SQL = """UPDATE todos SET tags=%s where id=%s"""
+        cursor.execute(_SQL, ( updated_tags, id))
