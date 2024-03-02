@@ -69,6 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const fetchAddToDoBtn = document.querySelector("#add_todo_btn");
     async function create_new_todo() {
       const todo_text = document.getElementById('todo').value;
+      if (todo_text.length === 0) {
+        alert('Please type non empty string');
+        return; // Exit the function if no valid tags
+    }      
       const data = {todo: todo_text}
       try {
         const res = await fetch("/add_todo", {
@@ -177,5 +181,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Repopulate the table with the filtered data
         populateTable(filteredData);
+    }
+
+    //Implementing Search
+    const searchButton = document.querySelector("#searchButton");
+    searchButton.addEventListener("click", searchTasks);
+
+    function searchTasks() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        if (searchQuery.length === 0) {
+            alert('Please enter keyword or phrase to search');
+            return; // Exit the function if no valid tags
+        }
+        const filteredData =originalData.filter(item => {
+            return item[1].toLowerCase().includes(searchQuery)
+        });
+        document.getElementById('searchInput').value = ''; 
+        populateTable(filteredData)
     }
 });
