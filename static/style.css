@@ -10,3 +10,13 @@ table {
     td, th {
     border:             thin dotted gray;
     }
+
+.tag {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 2px;
+    border-radius: 20px; /* Makes the tag oval */
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    cursor: pointer; /* Changes the cursor to a pointer when hovering over the tag */
+}    

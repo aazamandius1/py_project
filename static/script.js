@@ -1,4 +1,6 @@
+let originalData = []; // Store the original data here
 document.addEventListener('DOMContentLoaded', function() {
+
     //on page load read the data, saved in div element, parse it and populate table 
     const initialDataElement = document.getElementById('initialData');
     const initialData = JSON.parse(initialDataElement.dataset.initialData);
@@ -15,9 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.insertCell(0).innerText = item[0]; // ID
             row.insertCell(1).innerText = item[1]; // Task
             row.insertCell(2).innerText = item[2]; // Created
-            row.insertCell(3).innerText = item[3]; // Done
-            
-            
+            row.insertCell(3).innerText = item[3]; // Done 
             if (!item[3]) { // Assuming item[3] is the "Done" column
                 const doneButton = document.createElement('button');
                 doneButton.innerText = 'Mark as done';
@@ -28,28 +28,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             // Delete button row
             const deleteButton = document.createElement('button');
-                deleteButton.innerText = 'Delete entry';
-                deleteButton.addEventListener('click', function() {
-                    deleteTask(item[0]); // Assuming item[0] is the task ID
-                });
-                row.insertCell(4).appendChild(deleteButton);
+            deleteButton.innerText = 'Delete entry';
+            deleteButton.addEventListener('click', function() {
+                deleteTask(item[0]); // Assuming item[0] is the task ID
+            });
+            row.insertCell(4).appendChild(deleteButton);
 
-            //adding tags input and button to the table  
-            row.insertCell(5).innerText = item[4]; // Tags  
-            if (!item[5]) { // Assuming item[5] is the "tags" column
-                const addTagsButton = document.createElement('button');
-                const tagsInputField = document.createElement('input', );
-                tagsInputField.id = 'tagsInputField' + item[0]
-                row.insertCell(5).appendChild(tagsInputField);
-                row.insertCell(6).appendChild(addTagsButton);
-                addTagsButton.innerText = 'Add tags';
-                addTagsButton.addEventListener('click', function() {
-                    const tags_text = document.getElementById('tagsInputField' + item[0]).value;
-                    addTagsToTodo(tags_text, item[0]); // Assuming item[0] is the task ID
+        // Tags cell
+        const tagsCell = row.insertCell(5);
+        if (item[4] && item[4].trim() !== '') { // Assuming item[4] is the "tags" column in db`s returned data
+            const tags = item[4].split(','); 
+
+            tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.textContent = tag.trim(); //
+                tagElement.classList.add('tag');     // Add a class for styling
+                tagElement.addEventListener('click', () => {
+                    filterTasks(tag.trim());         // Implement a function to filter tasks by tag
                 });
+                tagsCell.appendChild(tagElement);
+            });
+        }    
+    
+        // Adding tags input and button to the table
+        const addTagsButton = document.createElement('button');
+        const tagsInputField = document.createElement('input');
+        tagsInputField.id = 'tagsInputField' + item[0];
+        row.insertCell(6).appendChild(tagsInputField);
+        row.insertCell(7).appendChild(addTagsButton);
+        addTagsButton.innerText = 'Add tags';
+        addTagsButton.addEventListener('click', function() {
+            const tags_text = document.getElementById('tagsInputField' + item[0]).value;
+            addTagsToTodo(tags_text, item[0]); // Assuming item[0] is the task ID
+        });
                 
-
-            }    
         });
     }
 
@@ -67,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const jsonResult = await res.json();
         const todos_table_data = jsonResult;
         document.getElementById('todo').value=''
+        originalData = todos_table_data;
         populateTable(todos_table_data);
       } catch (error) {
         console.log(error);
@@ -74,6 +87,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // add event listener for #fetchAddToDoBtn button
     fetchAddToDoBtn.addEventListener("click", create_new_todo);
+
+    // add event listener for #clear_filter button
+    const clearFilterBtn = document.querySelector("#clear_filter");
+    clearFilterBtn.addEventListener("click", clearFilter);
+
+    function clearFilter() {
+        populateTable(originalData);
+    }
 
     // Function to add tags to task
     async function addTagsToTodo(tags_text, taskId) {
@@ -102,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         });
         const jsonResult = await res.json();
+        originalData = jsonResult;
         populateTable(jsonResult); // Re-populate the table with the updated data
     } catch (error) {
             console.log(error);
@@ -117,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         });
         const jsonResult = await res.json();
+        originalData = jsonResult;
         populateTable(jsonResult); // Re-populate the table with the updated data
     } catch (error) {
             console.log(error);
@@ -132,10 +155,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(data)
             });
             const jsonResult = await res.json();
+            originalData = jsonResult;
             populateTable(jsonResult); // Re-populate the table with the updated data
         } catch (error) {
                 console.log(error);
             }
         }
 
+
+    function filterTasks(tag) {
+        if (!tag) return;
+        // Filter the original data based on the selected tag
+        const filteredData = originalData.filter(item => {
+            // Assuming item[4] contains the tags as a comma-separated string
+            if (!item[4] || item[4].trim() === '') {    // Handle items without tags
+                return false; // Include items without tags in the filtered data
+            }
+            const tags = item[4].split(',');
+            return tags.includes(tag);
+        });
+
+        // Repopulate the table with the filtered data
+        populateTable(filteredData);
+    }
 });
