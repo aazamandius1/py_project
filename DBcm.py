@@ -77,18 +77,14 @@ def add_user(username, email, password):
         _SQL = """SELECT username FROM users WHERE username=%s"""
         cursor.execute(_SQL, (username,))
         db_username = cursor.fetchall()
-        print(db_username)
-
-        if db_username == []:
-            _SQL = """INSERT INTO users
-                      (username, user_email, user_pwd) 
-                      values 
-                      (%s, %s, %s)"""
-            cursor.execute(_SQL, (username,
-                                  email,
-                                  password))
-        return ('user already exists')
-
+        _SQL = """INSERT INTO users
+                  (username, user_email, user_pwd) 
+                  values 
+                  (%s, %s, %s)"""
+        cursor.execute(_SQL, (username,
+                              email,
+                              password))
+                              
 def validate_user(username, password) -> bool:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT user_pwd FROM users WHERE username=%s"""
@@ -97,3 +93,10 @@ def validate_user(username, password) -> bool:
     if password == userPwd:
         return True
     return False
+
+def is_username_avalible(username)->bool:
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """SELECT username FROM users WHERE username=%s"""
+        cursor.execute(_SQL, (username,))
+        db_username = cursor.fetchall()
+        return not db_username

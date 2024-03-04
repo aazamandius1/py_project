@@ -252,4 +252,34 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('An error occurred during registration.');
         }
     });
+
+    //adding check 4 username avaliabilyty 
+    document.getElementById('nickname').addEventListener('input', function() {
+        const nickname = this.value;
+        if (nickname.length > 2) { // Check if the nickname is at least 3 characters long
+            fetch('/check-username', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nickname: nickname }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    // The username is available
+                    document.getElementById('username-feedback').textContent = 'Username is available';
+                    document.getElementById('username-feedback').style.color = 'green';
+                } else {
+                    // The username is taken
+                    document.getElementById('username-feedback').textContent = 'Username is taken';
+                    document.getElementById('username-feedback').style.color = 'red';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while checking username availability.');
+            });
+        }
+    });
 });

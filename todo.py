@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, jsonify, redirect
-from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags, add_user, validate_user
+from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags, add_user, validate_user, is_username_avalible
 from markupsafe import escape
 
 
@@ -67,6 +67,14 @@ def register():
     add_user(nickname, email, password)
     return jsonify({'success': True, 'message': 'User added, now you can try to login'})
 
+@app.route('/check-username', methods=['POST'])
+def check_username():
+    data = request.get_json()
+    nickname = data['nickname']
+    if is_username_avalible(nickname):
+        return jsonify({'available': True})
+    else:
+        return jsonify({'available': False})        
 
 if __name__ == '__main__':
     app.run(debug=True)        
