@@ -96,11 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // add event listener for #clear_filter button
         const clearFilterBtn = document.querySelector("#clear_filter");
-        clearFilterBtn.addEventListener("click", clearFilter);
-
-        function clearFilter() {
+        clearFilterBtn.addEventListener("click", function () {
             populateTable(originalData);
-        }
+        });
+
     } catch(error) {console.log(error)}
     // Function to add tags to task
     async function addTagsToTodo(tags_text, taskId) {
@@ -206,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
     //register button event listener to show register modal 
     try {
         document.getElementById('registerButton').addEventListener('click', function() {
-            console.log('open modal')
             document.getElementById('registerModal').style.display = 'block';
         });
         // Add a close button to the modal

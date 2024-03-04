@@ -12,7 +12,6 @@ def login() -> 'html':
 
 @app.route('/entry', methods=['POST','GET'])
 def greet() -> 'html':
-    print(request.form)
     username = request.form['login']
     password = request.form['password']
     if validate_user(username, password):

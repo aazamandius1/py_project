@@ -1,5 +1,6 @@
 from datetime import datetime
 import mariadb
+import bcrypt
 
 
 dbconfig = {'host': '127.0.0.1',
@@ -16,7 +17,7 @@ class UseDatabase:
         self.cursor = self.conn.cursor()
         return self.cursor
         
-#if somethig goes wrong, this three args are always given to the _exit_ by Interpreter        
+    #if somethig goes wrong, this three args are always given to the _exit_ by Interpreter        
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         self.conn.commit()
         self.cursor.close()
@@ -76,22 +77,24 @@ def add_user(username, email, password):
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT username FROM users WHERE username=%s"""
         cursor.execute(_SQL, (username,))
-        db_username = cursor.fetchall()
-        _SQL = """INSERT INTO users
-                  (username, user_email, user_pwd) 
-                  values 
-                  (%s, %s, %s)"""
-        cursor.execute(_SQL, (username,
-                              email,
-                              password))
-                              
+        db_username = cursor.fetchone()
+        if db_username is None:
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            _SQL = """INSERT INTO users
+                      (username, user_email, user_pwd) 
+                      values 
+                      (%s, %s, %s)"""
+            cursor.execute(_SQL, (username,
+                                  email,
+                                  hashed_password))
+
 def validate_user(username, password) -> bool:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT user_pwd FROM users WHERE username=%s"""
         cursor.execute(_SQL, (username,))
-        userPwd = cursor.fetchall()[0][0]
-    if password == userPwd:
-        return True
+        db_password_hash = cursor.fetchone()[0]
+        if db_password_hash and bcrypt.checkpw(password.encode('utf-8'), db_password_hash.encode('utf-8')):
+            return True
     return False
 
 def is_username_avalible(username)->bool:
