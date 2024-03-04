@@ -1,10 +1,11 @@
 let originalData = []; // Store the original data here
 document.addEventListener('DOMContentLoaded', function() {
-
+    try {
     //on page load read the data, saved in div element, parse it and populate table 
     const initialDataElement = document.getElementById('initialData');
     const initialData = JSON.parse(initialDataElement.dataset.initialData);
     populateTable(initialData);  
+    } catch { console.log('this is fine, go on');}
 
     // Function to populate the table
     function populateTable(data) {
@@ -89,17 +90,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(error);
       }
     }
-    // add event listener for #fetchAddToDoBtn button
-    fetchAddToDoBtn.addEventListener("click", create_new_todo);
+    try {
+        // add event listener for #fetchAddToDoBtn button
+        fetchAddToDoBtn.addEventListener("click", create_new_todo);
 
-    // add event listener for #clear_filter button
-    const clearFilterBtn = document.querySelector("#clear_filter");
-    clearFilterBtn.addEventListener("click", clearFilter);
+        // add event listener for #clear_filter button
+        const clearFilterBtn = document.querySelector("#clear_filter");
+        clearFilterBtn.addEventListener("click", clearFilter);
 
-    function clearFilter() {
-        populateTable(originalData);
-    }
-
+        function clearFilter() {
+            populateTable(originalData);
+        }
+    } catch(error) {console.log(error)}
     // Function to add tags to task
     async function addTagsToTodo(tags_text, taskId) {
     //validate tags input 
@@ -184,9 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Implementing Search
-    const searchButton = document.querySelector("#searchButton");
-    searchButton.addEventListener("click", searchTasks);
-
+    try {
+        const searchButton = document.querySelector("#searchButton");
+        searchButton.addEventListener("click", searchTasks);
+    } catch(error) {console.log(error)}
     function searchTasks() {
         const searchQuery = document.getElementById('searchInput').value.toLowerCase();
         if (searchQuery.length === 0) {
@@ -199,4 +202,54 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('searchInput').value = ''; 
         populateTable(filteredData)
     }
+
+    //register button event listener to show register modal 
+    try {
+        document.getElementById('registerButton').addEventListener('click', function() {
+            console.log('open modal')
+            document.getElementById('registerModal').style.display = 'block';
+        });
+        // Add a close button to the modal
+        document.getElementById('registerModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                this.style.display = 'none';
+            }
+        }); } 
+    catch(error) {console.log(error)}
+
+
+    //function to fetch registration data to backend and get results
+    document.getElementById('registerModal').addEventListener('submit', async function(event) {
+        
+        event.preventDefault(); // Prevent the default form submission
+    
+        const registerFormData = new FormData(event.target); // Get form data
+        const data = Object.fromEntries(registerFormData.entries()); // Convert form data to an object
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const responseData = await response.json();
+    
+            if (responseData.success) {
+                // Registration was successful, redirect or show a success message
+                alert('user registration succsessful')
+            } else {
+                // Show an error message
+                alert('Registration failed: ' + responseData.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred during registration.');
+        }
+    });
 });

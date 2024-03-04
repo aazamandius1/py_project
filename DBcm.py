@@ -65,9 +65,35 @@ def add_tags(tags_string, id) -> None:
             _SQL = """UPDATE todos SET tags=%s WHERE id=%s"""
             cursor.execute(_SQL, (new_tags, id))
         else:
-            #if there are tags, merge new whith existing and remuve duplicates
+            #if there are tags, merge new whith existing and remove duplicates
             existing_tags = set(current_tags[0][0].split(','))
             updated_tags = existing_tags.union(tags)
             updated_tags = ','.join(updated_tags)
             _SQL = """UPDATE todos SET tags=%s where id=%s"""
             cursor.execute(_SQL, ( updated_tags, id))
+
+def add_user(username, email, password):
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """SELECT username FROM users WHERE username=%s"""
+        cursor.execute(_SQL, (username,))
+        db_username = cursor.fetchall()
+        print(db_username)
+
+        if db_username == []:
+            _SQL = """INSERT INTO users
+                      (username, user_email, user_pwd) 
+                      values 
+                      (%s, %s, %s)"""
+            cursor.execute(_SQL, (username,
+                                  email,
+                                  password))
+        return ('user already exists')
+
+def validate_user(username, password) -> bool:
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """SELECT user_pwd FROM users WHERE username=%s"""
+        cursor.execute(_SQL, (username,))
+        userPwd = cursor.fetchall()[0][0]
+    if password == userPwd:
+        return True
+    return False

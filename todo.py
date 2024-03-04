@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, jsonify, redirect
-from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags
+from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags, add_user, validate_user
 from markupsafe import escape
 
 
@@ -12,13 +12,17 @@ def login() -> 'html':
 
 @app.route('/entry', methods=['POST','GET'])
 def greet() -> 'html':
+    print(request.form)
     username = request.form['login']
-    app.config['username'] = username
-    list = show_todos(username)
-    return render_template('entry.html', 
-                            the_username = username, 
-                            the_list = list, 
-                            the_title = 'Type and add smthn to todo list')
+    password = request.form['password']
+    if validate_user(username, password):
+        app.config['username'] = username
+        list = show_todos(username)
+        return render_template('entry.html', 
+                                the_username = username, 
+                                the_list = list, 
+                                the_title = 'Type and add smthn to todo list')
+    return "Invalid login", 401                            
 
 
 @app.route('/add_todo', methods=['POST','GET'])
@@ -53,6 +57,17 @@ def add_tags_to_todo():
     tags_string = data.get('tags_string')
     add_tags(tags_string, id)
     return jsonify(show_todos(username))
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    nickname = data['nickname']
+    email = data['email']
+    password = data['password']
+    add_user(nickname, email, password)
+    return jsonify({'success': True, 'message': 'User added, now you can try to login'})
+
+
 if __name__ == '__main__':
     app.run(debug=True)        
 

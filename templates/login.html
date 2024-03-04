@@ -5,9 +5,26 @@
 <h2>{{the_title}}</h2>
 
 <form method="POST" action="/entry">
-<p>Introduce yourself</p>
-<input name='login' type="text" width="60">
-<p><input value='Log in' type='SUBMIT'></p>
+    <p>Introduce yourself</p>
+    <p>Login:</p>
+    <input name='login' type="text" width="60" required>
+    <p>Password:</p>
+    <input name='password' type="password" width="60" required>
+    <p><input value='Log in' type='SUBMIT'></p>
 </form>
 
+<button id="registerButton">Register</button>
+<!-- Modal for the registration form -->
+<div id="registerModal" style="display: none;">
+    <form id="registerForm" method="POST" action="/register">
+        <h2>Register</h2>
+        <p>Nickname:</p>
+        <input name='nickname' type="text" required>
+        <p>Email:</p>
+        <input name='email' type="email" required>
+        <p>Password:</p>
+        <input name='password' type="password" required>
+        <p><input value='Register' type='SUBMIT'></p>
+    </form>
+</div>
 {% endblock %}
