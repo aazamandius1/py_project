@@ -18,14 +18,15 @@
 <div id="registerModal" style="display: none;">
     <form id="registerForm" method="POST" action="/register">
         <h2>Register</h2>
+        <h4>Please enter your info into this form and press "Submit data" button</h4>
         <p>Nickname:</p>
-        <input name='nickname' id='nickname' type="text" required>
+        <input name='nickname' id='nicknameInput' type="text" required>
         <p id="username-feedback"></p>
         <p>Email:</p>
         <input name='email' type="email" required>
         <p>Password:</p>
         <input name='password' type="password" required>
-        <p><input value='Register' type='SUBMIT'></p>
+        <p><input value='Submit data' type='SUBMIT'></p>
     </form>
 </div>
 {% endblock %}
