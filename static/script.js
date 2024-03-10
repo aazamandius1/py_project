@@ -91,6 +91,16 @@ function addTagsInputAndButton(row, taskId) {
     addTagsButton.innerText = 'Add tags';
     addTagsButton.addEventListener('click', () => addTagsToTodo(tagsInputField.value, taskId));
     row.insertCell(7).appendChild(addTagsButton);
+
+    tagsInputField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default form submission behavior
+            addTagsToTodo(tagsInputField.value, taskId); /* Call function to submit the data*/}});    
+
+    const clearTagsButton = document.createElement('button');
+    clearTagsButton.innerText = 'Clear tags';
+    clearTagsButton.addEventListener('click', () => clearTagsFromTodo(taskId));
+    row.insertCell(8).appendChild(clearTagsButton);
 }
 
 async function createNewTodo() {
@@ -204,6 +214,22 @@ async function addTagsToTodo(tagsText, taskId) {
     const data = { id: taskId, tags_string: tags.join(', ') };
     try {
         const res = await fetch("/addtags", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json;charset=utf-8' },
+            body: JSON.stringify(data),
+        });
+        const jsonResult = await res.json();
+        originalData = jsonResult;
+        populateTable(jsonResult);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function clearTagsFromTodo(taskId) {
+    const data = { id: taskId };
+    try {
+        const res = await fetch("/cleartags", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json;charset=utf-8' },
             body: JSON.stringify(data),

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, jsonify, redirect
-from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags, add_user, validate_user, is_username_avalible
+from DBcm import UseDatabase, show_todos, post_todo, make_todo_done, delete_todo, add_tags, add_user, validate_user, is_username_avalible, clear_tags
 from markupsafe import escape
 
 
@@ -55,6 +55,14 @@ def add_tags_to_todo():
     id = data.get('id')
     tags_string = data.get('tags_string')
     add_tags(tags_string, id)
+    return jsonify(show_todos(username))
+
+@app.route('/cleartags', methods=['POST'])
+def clear_tags_from_todo():
+    username = app.config['username']
+    data = request.get_json()
+    id = data.get('id')
+    clear_tags(id)
     return jsonify(show_todos(username))
 
 @app.route('/register', methods=['POST'])

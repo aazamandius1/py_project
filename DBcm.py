@@ -75,6 +75,10 @@ def add_tags(tags_string, id) -> None:
             _SQL = """UPDATE todos SET tags=%s where id=%s"""
             cursor.execute(_SQL, ( updated_tags, id))
 
+def clear_tags(id) -> None:
+    with UseDatabase(dbconfig) as cursor:
+        _SQL = """UPDATE todos SET tags=NULL where id=%s"""
+        cursor.execute(_SQL, (id,))
 
 def add_user(username, email, password):
     with UseDatabase(dbconfig) as cursor:
