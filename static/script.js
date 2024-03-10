@@ -1,245 +1,221 @@
-let originalData = []; // Store the original data here
+// Global variables
+let originalData = [];
 
-// Function to populate the table
+// DOM elements
+const todoTable = document.getElementById('todo-table');
+const addTodoBtn = document.querySelector("#add_todo_btn");
+const registerButton = document.getElementById('registerButton');
+const registerModal = document.getElementById('registerModal');
+const usernameInput = document.getElementById('nicknameInput');
+const clearFilterBtn = document.querySelector("#clear_filter");
+const todoInput = document.getElementById('todo');
+
+// Event listeners
+if (addTodoBtn) addTodoBtn.addEventListener("click", createNewTodo);
+if (todoInput) todoInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default form submission behavior
+    createNewTodo(); /* Call function to submit the data*/}});
+if (registerButton) registerButton.addEventListener('click', showRegisterModal);
+if (registerModal) registerModal.addEventListener('submit', registerUser);
+if (usernameInput) usernameInput.addEventListener('input', checkUsernameAvailability);
+if (clearFilterBtn) clearFilterBtn.addEventListener("click", clearFilter);
+
+// Populate table with initial data
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const initialDataElement = document.getElementById('initialData');
+        const initialData = JSON.parse(initialDataElement.dataset.initialData);
+        populateTable(initialData);
+    } catch {
+        console.log('No initial data found.');
+    }
+});
+
+// Functions
 function populateTable(data) {
-    const table = document.getElementById('todo-table');
-    const tbody = table.querySelector('tbody')
-    tbody.innerHTML='';
+    const tbody = todoTable.querySelector('tbody');
+    tbody.innerHTML = '';
     data.forEach(item => {
         const row = tbody.insertRow();
-        row.insertCell(0).innerText = item[0]; // ID
-        row.insertCell(1).innerText = item[1]; // Task
-        row.insertCell(2).innerText = item[2]; // Created
-        row.insertCell(3).innerText = item[3]; // Done 
-        if (!item[3]) { // Assuming item[3] is the "Done" column
-            const doneButton = document.createElement('button');
-            doneButton.innerText = 'Mark as done';
-            doneButton.addEventListener('click', function() {
-                markTaskAsDone(item[0]); // Assuming item[0] is the task ID
-            });
-            row.insertCell(3).appendChild(doneButton);
-        }
-        // Delete button row
-        const deleteButton = document.createElement('button');
-        deleteButton.innerText = 'Delete entry';
-        deleteButton.addEventListener('click', function() {
-            deleteTask(item[0]); // Assuming item[0] is the task ID
-        });
-        row.insertCell(4).appendChild(deleteButton);
-    // Tags cell
-    const tagsCell = row.insertCell(5);
-    if (item[4] && item[4].trim() !== '') { // Assuming item[4] is the "tags" column in db`s returned data
-        const tags = item[4].split(','); 
-        tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.textContent = tag.trim(); //
-            tagElement.classList.add('tag');     // Add a class for styling
-            tagsCell.appendChild(tagElement);
-        });
-    }    
-
-    // Adding tags input and button to the table
-    const addTagsButton = document.createElement('button');
-    const tagsInputField = document.createElement('input');
-    tagsInputField.id = 'tagsInputField' + item[0];
-    row.insertCell(6).appendChild(tagsInputField);
-    row.insertCell(7).appendChild(addTagsButton);
-    addTagsButton.innerText = 'Add tags';
-    addTagsButton.addEventListener('click', function() {
-        const tags_text = document.getElementById('tagsInputField' + item[0]).value;
-        addTagsToTodo(tags_text, item[0]); // Assuming item[0] is the task ID
-    });
-            
+        populateRow(row, item);
     });
 }
-// function that submits new todo and reload the table with new todos data
-const fetchAddToDoBtn = document.querySelector("#add_todo_btn");
-if (fetchAddToDoBtn) {
-fetchAddToDoBtn.addEventListener("click", create_new_todo);
-async function create_new_todo() {
-  const todo_text = document.getElementById('todo').value;
-  if (todo_text.length === 0) {
-    alert('Please type non empty string');
-    return; // Exit the function if no valid tags
-}      
-  const data = {todo: todo_text}
-  try {
-    const res = await fetch("/add_todo", {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json;charset=utf-8'},
-                            body: JSON.stringify(data)
-                            });
-    const jsonResult = await res.json();
-    const todos_table_data = jsonResult;
-    document.getElementById('todo').value=''
-    originalData = todos_table_data;
-    populateTable(todos_table_data);
-  } catch (error) {
-    console.log(error);
-  }
-} }
 
-//function to delete todo entry
+function populateRow(row, item) {
+    row.insertCell(0).innerText = item[0]; // ID
+    row.insertCell(1).innerText = item[1]; // Task
+    row.insertCell(2).innerText = item[2]; // Created
+    row.insertCell(3).innerText = item[3]; // Done
+    addDoneButton(row, item[0]);
+    addDeleteButton(row, item[0]);
+    addTagsCell(row, item[4]);
+    addTagsInputAndButton(row, item[0]);
+}
+
+function addDoneButton(row, taskId) {
+    if (!row.cells[3].innerText) {
+        const doneButton = document.createElement('button');
+        doneButton.innerText = 'Mark as done';
+        doneButton.addEventListener('click', () => markTaskAsDone(taskId));
+        row.insertCell(3).appendChild(doneButton);
+    }
+}
+
+function addDeleteButton(row, taskId) {
+    const deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Delete entry';
+    deleteButton.addEventListener('click', () => deleteTask(taskId));
+    row.insertCell(4).appendChild(deleteButton);
+}
+
+function addTagsCell(row, tags) {
+    const tagsCell = row.insertCell(5);
+    if (tags && tags.trim() !== '') {
+        const tagElements = tags.split(',').map(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.textContent = tag.trim();
+            tagElement.classList.add('tag');
+            return tagElement;
+        });
+        tagElements.forEach(tagElement => tagsCell.appendChild(tagElement));
+    }
+}
+
+function addTagsInputAndButton(row, taskId) {
+    const tagsInputField = document.createElement('input');
+    tagsInputField.id = 'tagsInputField' + taskId;
+    row.insertCell(6).appendChild(tagsInputField);
+
+    const addTagsButton = document.createElement('button');
+    addTagsButton.innerText = 'Add tags';
+    addTagsButton.addEventListener('click', () => addTagsToTodo(tagsInputField.value, taskId));
+    row.insertCell(7).appendChild(addTagsButton);
+}
+
+async function createNewTodo() {
+    const todoText = todoInput.value;
+    if (!todoText) {
+        alert('Please type a non-empty string');
+        return;
+    }
+    const data = { todo: todoText };
+    try {
+        const res = await fetch("/add_todo", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json;charset=utf-8' },
+            body: JSON.stringify(data)
+        });
+        const jsonResult = await res.json();
+        originalData = jsonResult;
+        populateTable(jsonResult);
+        todoInput.value = '';
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function deleteTask(taskId) {
-    const data = {id: taskId};
+    const data = { id: taskId };
     try {
         const res = await fetch("/delete_todo", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json;charset=utf-8'},
+            headers: { 'Content-Type': 'application/json;charset=utf-8' },
             body: JSON.stringify(data)
         });
         const jsonResult = await res.json();
         originalData = jsonResult;
-        populateTable(jsonResult); // Re-populate the table with the updated data
+        populateTable(jsonResult);
     } catch (error) {
-            console.log(error);
-        }
+        console.log(error);
     }
+}
 
-// Function to mark a task as done
 async function markTaskAsDone(taskId) {
-    const data = {id: taskId};
+    const data = { id: taskId };
+    try {
         const res = await fetch("/markdone", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json;charset=utf-8'},
+            headers: { 'Content-Type': 'application/json;charset=utf-8' },
             body: JSON.stringify(data)
         });
         const jsonResult = await res.json();
         originalData = jsonResult;
-        populateTable(jsonResult); // Re-populate the table with the updated data
+        populateTable(jsonResult);
+    } catch (error) {
+        console.log(error);
     }
+}
 
-//register button event listener to show register modal 
-
-let register_btn = document.getElementById('registerButton')
-if (register_btn) {
-    register_btn.addEventListener('click', function() {
-    document.getElementById('registerModal').style.display = 'block';
-}); }
-
-//function to fetch registration data to backend and get results
-let registerModal = document.getElementById('registerModal')
-if (registerModal) {
-    registerModal.addEventListener('submit', async function(event) {
-    
-    event.preventDefault(); // Prevent the default form submission
-
-    const registerFormData = new FormData(event.target); // Get form data
-    const data = Object.fromEntries(registerFormData.entries()); // Convert form data to an object
+async function registerUser(event) {
+    event.preventDefault();
+    const registerFormData = new FormData(event.target);
+    const data = Object.fromEntries(registerFormData.entries());
     try {
         const response = await fetch('/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
+        if (!response.ok) throw new Error('Network response was not ok');
         const responseData = await response.json();
-
         if (responseData.success) {
-            // Registration was successful, redirect or show a success message
-            alert('user registration succsessful')
+            alert('User registration successful');
         } else {
-            // Show an error message
             alert('Registration failed: ' + responseData.message);
         }
     } catch (error) {
         console.error('Error:', error);
         alert('An error occurred during registration.');
     }
-});     }
+}
 
+function showRegisterModal() {
+    document.getElementById('registerModal').style.display = 'block';
+}
 
-//adding check 4 username avaliabilyty 
-
-const usernameInput = document.getElementById('nicknameInput')
-if (usernameInput) {
-    usernameInput.addEventListener('input', checkUsernameInput);
-
-function checkUsernameInput() {
-    let nickname = this.value;
-    if (nickname && nickname.length > 2) { // Check if the nickname is at least 3 characters long
+function checkUsernameAvailability() {
+    const nickname = this.value;
+    if (nickname && nickname.length > 2) {
         fetch('/check-username', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nickname: nickname }),
         })
         .then(response => response.json())
         .then(data => {
-            if (data.available) {
-                // The username is available
-                document.getElementById('username-feedback').textContent = 'Username is available';
-                document.getElementById('username-feedback').style.color = 'green';
-            } else {
-                // The username is taken
-                document.getElementById('username-feedback').textContent = 'Username is taken';
-                document.getElementById('username-feedback').style.color = 'red';
-            }
+            const feedbackElement = document.getElementById('username-feedback');
+            feedbackElement.textContent = data.available ? 'Username is available' : 'Username is taken';
+            feedbackElement.style.color = data.available ? 'green' : 'red';
         })
-        .catch((error) => {
+        .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while checking username availability.');
         });
     }
 }
-}
 
-// add event listener for #clear_filter button
-const clearFilterBtn = document.querySelector("#clear_filter");
-if (clearFilterBtn) {
-clearFilterBtn.addEventListener("click", function () {
-    populateTable(originalData);
-}); }
-
-// Function to add tags to task
-async function addTagsToTodo(tags_text, taskId) {
-    //validate tags input 
-        const tags = tags_text.split(',').map(tag=>tag.trim());
-        const uniqueTags = tags.filter((tag, index, self) =>
-            tag.length > 0 && index === self.findIndex((t) => (
-                t.toLowerCase() === tag.toLowerCase()
-            ))
-        );
-
-        if (uniqueTags.length === 0) {
-            alert('Please enter at least one valid tag, or several, separated by comas.');
-            return; // Exit the function if no valid tags
-        }
-
-        const validatedTagsString = uniqueTags.join(', ');
-    
-    
-    const data = {id: taskId,
-                  tags_string: validatedTagsString };
-   
+async function addTagsToTodo(tagsText, taskId) {
+    const tags = tagsText.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    if (tags.length === 0) {
+        alert('Please enter at least one valid tag, or several, separated by commas.');
+        return;
+    }
+    const data = { id: taskId, tags_string: tags.join(', ') };
+    try {
         const res = await fetch("/addtags", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json;charset=utf-8'},
-            body: JSON.stringify(data)
+            headers: { 'Content-Type': 'application/json;charset=utf-8' },
+            body: JSON.stringify(data),
         });
         const jsonResult = await res.json();
         originalData = jsonResult;
-        populateTable(jsonResult); // Re-populate the table with the updated data
+        populateTable(jsonResult);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-
-
-  
-document.addEventListener('DOMContentLoaded', function() {
-    
-try {
-    //on page load read the data, saved in div element, parse it and populate table 
-    const initialDataElement = document.getElementById('initialData');
-    const initialData = JSON.parse(initialDataElement.dataset.initialData);
-    populateTable(initialData);  
-    } 
-catch { console.log('this is fine, go on');}
-
-});
+function clearFilter() {
+    populateTable(originalData);
+}

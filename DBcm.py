@@ -22,7 +22,8 @@ class UseDatabase:
         self.conn.commit()
         self.cursor.close()
         self.conn.close()
-        
+
+
 def show_todos(username) -> list:
         with UseDatabase(dbconfig) as cursor:
             _SQL = """SELECT id, todo_text, created, done, tags from todos where user = %s"""
@@ -50,6 +51,7 @@ def delete_todo(id) -> None:
         _SQL = """DELETE FROM todos WHERE id=%s"""
         cursor.execute(_SQL, (id,))        
 
+
 def add_tags(tags_string, id) -> None:
     with UseDatabase(dbconfig) as cursor:
         # Normalize tags
@@ -72,6 +74,7 @@ def add_tags(tags_string, id) -> None:
             updated_tags = ','.join(updated_tags)
             _SQL = """UPDATE todos SET tags=%s where id=%s"""
             cursor.execute(_SQL, ( updated_tags, id))
+
 
 def add_user(username, email, password):
     with UseDatabase(dbconfig) as cursor:
