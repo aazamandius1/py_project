@@ -76,6 +76,8 @@ function addTagsCell(row, tags) {
             const tagElement = document.createElement('span');
             tagElement.textContent = tag.trim();
             tagElement.classList.add('tag');
+            // Add event listener to each tag element
+            tagElement.addEventListener('click', () => fetchTodosByTag(tag.trim()));
             return tagElement;
         });
         tagElements.forEach(tagElement => tagsCell.appendChild(tagElement));
@@ -239,6 +241,16 @@ async function clearTagsFromTodo(taskId) {
         populateTable(jsonResult);
     } catch (error) {
         console.log(error);
+    }
+}
+
+async function fetchTodosByTag(tag) {
+    try {
+        const response = await fetch(`/tags/${encodeURIComponent(tag.trim())}`);
+        const data = await response.json();
+        populateTable(data);
+    } catch (error) {
+        console.error('Error fetching filtered todos:', error);
     }
 }
 

@@ -31,6 +31,16 @@ def show_todos(username) -> list:
             to_do_list = cursor.fetchall()
             return to_do_list
 
+def show_todos_with_tag(username, tag) -> list:
+        with UseDatabase(dbconfig) as cursor:
+            _SQL = """SELECT id, todo_text, created, done, tags FROM todos WHERE user = %s AND tags LIKE %s """
+            try:
+                cursor.execute(_SQL, (username, '%'+tag+'%'))
+                to_do_list = cursor.fetchall()
+            except Exception as e:
+                print(f'DB error: {e}')
+            return to_do_list
+
 def post_todo(username, to_do) -> None:
         with UseDatabase(dbconfig) as cursor:
             _SQL = """INSERT INTO todos
@@ -49,8 +59,7 @@ def make_todo_done(id) -> None:
 def delete_todo(id) -> None:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """DELETE FROM todos WHERE id=%s"""
-        cursor.execute(_SQL, (id,))        
-
+        cursor.execute(_SQL, (id,))
 
 def add_tags(tags_string, id) -> None:
     with UseDatabase(dbconfig) as cursor:
