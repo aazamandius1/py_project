@@ -43,24 +43,29 @@ function populateTable(data) {
 }
 
 function populateRow(row, item) {
-    row.insertCell(0).innerText = item[0]; // ID
-    row.insertCell(1).innerText = item[1]; // Task
-    row.insertCell(2).innerText = item[2]; // Created
-    row.insertCell(3).innerText = item[3]; // Done
-    addDoneButton(row, item[0]);
-    addDeleteButton(row, item[0]);
-    addTagsCell(row, item[4]);
-    addTagsInputAndButton(row, item[0]);
-}
+    row.insertCell(0).innerText = item._id; // ID
+    row.insertCell(1).innerText = item.todo_text; // Task
+    row.insertCell(2).innerText = new Date(item.created).toLocaleString(); // Created
 
-function addDoneButton(row, taskId) {
-    if (!row.cells[3].innerText) {
+    // Check if the 'done' field is false or not present
+    if (item.done === false || item.done === undefined) {
+        // If 'done' is false or not present, insert a cell for the "Mark as done" button
+        const doneCell = row.insertCell(3);
         const doneButton = document.createElement('button');
         doneButton.innerText = 'Mark as done';
-        doneButton.addEventListener('click', () => markTaskAsDone(taskId));
-        row.insertCell(3).appendChild(doneButton);
+        doneButton.addEventListener('click', () => markTaskAsDone(item._id));
+        doneCell.appendChild(doneButton);
+    } else {
+        // If 'done' is true, insert a cell for the "Done" status
+        row.insertCell(3).innerText = item.done;
     }
+
+
+    addDeleteButton(row, item._id);
+    addTagsCell(row, item.tags);
+    addTagsInputAndButton(row, item._id);
 }
+
 
 function addDeleteButton(row, taskId) {
     const deleteButton = document.createElement('button');
@@ -71,16 +76,15 @@ function addDeleteButton(row, taskId) {
 
 function addTagsCell(row, tags) {
     const tagsCell = row.insertCell(5);
-    if (tags && tags.trim() !== '') {
-        const tagElements = tags.split(',').map(tag => {
+    if (tags && tags.length > 0) {
+        tags.forEach(tag => {
             const tagElement = document.createElement('span');
-            tagElement.textContent = tag.trim();
+            tagElement.textContent = tag; // No need to trim or split
             tagElement.classList.add('tag');
             // Add event listener to each tag element
-            tagElement.addEventListener('click', () => fetchTodosByTag(tag.trim()));
-            return tagElement;
+            tagElement.addEventListener('click', () => fetchTodosByTag(tag));
+            tagsCell.appendChild(tagElement);
         });
-        tagElements.forEach(tagElement => tagsCell.appendChild(tagElement));
     }
 }
 
@@ -215,7 +219,7 @@ async function addTagsToTodo(tagsText, taskId) {
     }
     const data = { id: taskId, tags_string: tags.join(', ') };
     try {
-        const res = await fetch("/addtags", {
+        const res = await fetch("/addtag", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json;charset=utf-8' },
             body: JSON.stringify(data),

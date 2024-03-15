@@ -25,7 +25,7 @@
         </tbody>
     </table>    
 </div>
-<div id='initialData' data-initial-data='{{ the_list|tojson }}'>
+<div id='initialData' data-initial-data='{{ the_list | safe }}'>
 </div>
 
 {% endblock %}

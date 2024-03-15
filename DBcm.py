@@ -23,14 +23,14 @@ class UseDatabase:
         self.cursor.close()
         self.conn.close()
 
-
+#
 def show_todos(username) -> list:
         with UseDatabase(dbconfig) as cursor:
             _SQL = """SELECT id, todo_text, created, done, tags from todos where user = %s"""
             cursor.execute(_SQL, (username,))
             to_do_list = cursor.fetchall()
             return to_do_list
-
+#
 def show_todos_with_tag(username, tag) -> list:
         with UseDatabase(dbconfig) as cursor:
             _SQL = """SELECT id, todo_text, created, done, tags FROM todos WHERE user = %s AND tags LIKE %s """
@@ -40,7 +40,7 @@ def show_todos_with_tag(username, tag) -> list:
             except Exception as e:
                 print(f'DB error: {e}')
             return to_do_list
-
+#
 def post_todo(username, to_do) -> None:
         with UseDatabase(dbconfig) as cursor:
             _SQL = """INSERT INTO todos
@@ -50,17 +50,17 @@ def post_todo(username, to_do) -> None:
             cursor.execute(_SQL, (username,
                                   to_do,
                                   str(datetime.now())[:-7],))
-
+#
 def make_todo_done(id) -> None:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """UPDATE todos SET done=%s where id=%s"""
         cursor.execute(_SQL, (str(datetime.now())[:-7], id))
-
+#
 def delete_todo(id) -> None:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """DELETE FROM todos WHERE id=%s"""
         cursor.execute(_SQL, (id,))
-
+#
 def add_tags(tags_string, id) -> None:
     with UseDatabase(dbconfig) as cursor:
         # Normalize tags
@@ -83,12 +83,12 @@ def add_tags(tags_string, id) -> None:
             updated_tags = ','.join(updated_tags)
             _SQL = """UPDATE todos SET tags=%s where id=%s"""
             cursor.execute(_SQL, ( updated_tags, id))
-
+#
 def clear_tags(id) -> None:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """UPDATE todos SET tags=NULL where id=%s"""
         cursor.execute(_SQL, (id,))
-
+#
 def add_user(username, email, password):
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT username FROM users WHERE username=%s"""
@@ -103,7 +103,7 @@ def add_user(username, email, password):
             cursor.execute(_SQL, (username,
                                   email,
                                   hashed_password))
-
+#
 def validate_user(username, password) -> bool:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT user_pwd FROM users WHERE username=%s"""
@@ -112,7 +112,7 @@ def validate_user(username, password) -> bool:
         if db_password_hash and bcrypt.checkpw(password.encode('utf-8'), db_password_hash.encode('utf-8')):
             return True
     return False
-
+#
 def is_username_avalible(username)->bool:
     with UseDatabase(dbconfig) as cursor:
         _SQL = """SELECT username FROM users WHERE username=%s"""
