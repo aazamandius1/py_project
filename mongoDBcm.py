@@ -6,13 +6,6 @@ import bcrypt
 import json
 from bson import ObjectId
 
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o) # Convert ObjectId to string
-        elif isinstance(o, datetime):
-            return o.isoformat() # Convert datetime to ISO 8601 format string
-        return json.JSONEncoder.default(self, o)
 
 db_config = {
     'host': 'localhost',
@@ -22,6 +15,14 @@ db_config = {
     'database':'todos',
     'authenticationDatabase': 'todos'
 }
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o) # Convert ObjectId to string
+        elif isinstance(o, datetime):
+            return o.isoformat() # Convert datetime to ISO 8601 format string
+        return json.JSONEncoder.default(self, o)
 
 class UseDatabase:
     def __init__(self, config: dict) -> None:

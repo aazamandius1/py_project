@@ -43,21 +43,21 @@ function populateTable(data) {
 }
 
 function populateRow(row, item) {
-    row.insertCell(0).innerText = item._id; // ID
-    row.insertCell(1).innerText = item.todo_text; // Task
-    row.insertCell(2).innerText = new Date(item.created).toLocaleString(); // Created
+    /*row.insertCell(0).innerText = item._id; // ID  */
+    row.insertCell(0).innerText = item.todo_text; // Task
+    row.insertCell(1).innerText = new Date(item.created).toLocaleString(); // Created
 
     // Check if the 'done' field is false or not present
     if (item.done === false || item.done === undefined) {
         // If 'done' is false or not present, insert a cell for the "Mark as done" button
-        const doneCell = row.insertCell(3);
+        const doneCell = row.insertCell(2);
         const doneButton = document.createElement('button');
         doneButton.innerText = 'Mark as done';
         doneButton.addEventListener('click', () => markTaskAsDone(item._id));
         doneCell.appendChild(doneButton);
     } else {
         // If 'done' is true, insert a cell for the "Done" status
-        row.insertCell(3).innerText = item.done;
+        row.insertCell(2).innerText = new Date(item.done).toLocaleString()
     }
 
 
@@ -71,11 +71,11 @@ function addDeleteButton(row, taskId) {
     const deleteButton = document.createElement('button');
     deleteButton.innerText = 'Delete entry';
     deleteButton.addEventListener('click', () => deleteTask(taskId));
-    row.insertCell(4).appendChild(deleteButton);
+    row.insertCell(3).appendChild(deleteButton);
 }
 
 function addTagsCell(row, tags) {
-    const tagsCell = row.insertCell(5);
+    const tagsCell = row.insertCell(4);
     if (tags && tags.length > 0) {
         tags.forEach(tag => {
             const tagElement = document.createElement('span');
@@ -91,12 +91,12 @@ function addTagsCell(row, tags) {
 function addTagsInputAndButton(row, taskId) {
     const tagsInputField = document.createElement('input');
     tagsInputField.id = 'tagsInputField' + taskId;
-    row.insertCell(6).appendChild(tagsInputField);
+    row.insertCell(5).appendChild(tagsInputField);
 
     const addTagsButton = document.createElement('button');
-    addTagsButton.innerText = 'Add tags';
+    addTagsButton.innerText = 'Add tag';
     addTagsButton.addEventListener('click', () => addTagsToTodo(tagsInputField.value, taskId));
-    row.insertCell(7).appendChild(addTagsButton);
+    row.insertCell(6).appendChild(addTagsButton);
 
     tagsInputField.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
@@ -106,7 +106,7 @@ function addTagsInputAndButton(row, taskId) {
     const clearTagsButton = document.createElement('button');
     clearTagsButton.innerText = 'Clear tags';
     clearTagsButton.addEventListener('click', () => clearTagsFromTodo(taskId));
-    row.insertCell(8).appendChild(clearTagsButton);
+    row.insertCell(7).appendChild(clearTagsButton);
 }
 
 async function createNewTodo() {
