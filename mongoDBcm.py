@@ -88,14 +88,11 @@ def delete_todo(todo_id):
 def add_tag(tag_string, todo_id):
     with UseDatabase(db_config) as db:
         #convert id from string to ObjectId
-        todo_id_object = ObjectId(todo_id)     
-        # Normalize the tag
-        tag = tag_string.strip().lower()
-        
+        todo_id_object = ObjectId(todo_id)
         # Use $addToSet to add the tag to the tags array only if it does not already exist
         result = db.todos.update_one(
             {"_id": todo_id_object}, 
-            {"$addToSet": {"tags": tag}}
+            {"$addToSet": {"tags": tag_string}}
         )
         
         if result.modified_count == 1:
@@ -125,11 +122,14 @@ def add_user(username, email, password):
                 }
                 result = db.users.insert_one(user_item)
                 if result.acknowledged:
-                    print("User added successfully.")
+                    message =("User added successfully.")
                 else:
-                    print("Failed to add user.")
+                    message =("Failed to add user.")
         except Exception as e:
             print(f"An error occurred: {e}")
+    else:
+        message =('user already exist')
+    return message
 
 def is_username_available(username)->bool:
     try:

@@ -52,8 +52,8 @@ def add_tag_to_todo():
     username = app.config['username']
     data = request.get_json()
     id = data.get('id')
-    tags_string = data.get('tags_string')
-    add_tag(tags_string, id)
+    tag_string = data.get('tag_string')
+    add_tag(tag_string, id)
     return show_todos(username)
 
 @app.route('/cleartags', methods=['POST'])
@@ -76,8 +76,8 @@ def register():
     nickname = data['nickname']
     email = data['email']
     password = data['password']
-    add_user(nickname, email, password)
-    return jsonify({'success': True, 'message': 'User added, now you can try to login'})
+    message = add_user(nickname, email, password)
+    return jsonify({'success': True, 'message': message})
 
 @app.route('/check-username', methods=['POST'])
 def check_username():
