@@ -1,0 +1,22 @@
+table {
+    font-size:          1em;
+    background-color:   #fafcff;
+    border:             1px solid #909090;
+    color:              #2a2a2a;
+    padding:            5px 5px 2px;
+    border-collapse:    collapse;
+    }
+    
+    td, th {
+    border:             thin dotted gray;
+    }
+
+.tag {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 2px;
+    border-radius: 20px; /* Makes the tag oval */
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    cursor: pointer; /* Changes the cursor to a pointer when hovering over the tag */
+}    

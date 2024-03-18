@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>{{the_title}}</h2>
+<h3>Hello {{the_username}}</h3>
+<p>Use this form to submit a to-do into list</p>
+<input id="todo"  type="text" width="60" placeholder="type here the task..."> <button id="add_todo_btn">Add task</button> 
+
+<button id ='clear_filter'>Clear Filter</button>
+<div id="data-table">
+    <table id="todo-table">
+        <thead>
+            <tr>
+
+                <th>Task</th>
+                <th>Created</th>
+                <th>Done</th>
+                <th>Delete</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be added here dynamically -->
+        </tbody>
+    </table>    
+</div>
+<div id='initialData' data-initial-data='{{ the_list | safe }}'>
+</div>
+
+{% endblock %}

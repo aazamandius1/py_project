@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>{{the_title}}</h2>
+
+<form method="POST" action="/entry">
+    <p>Introduce yourself</p>
+    <p>Login:</p>
+    <input name='login' type="text" width="60" required>
+    <p>Password:</p>
+    <input name='password' type="password" width="60" required>
+    <p><input value='Log in' type='SUBMIT'></p>
+</form>
+
+<button id="registerButton">Register</button>
+<!-- Modal for the registration form -->
+<div id="registerModal" style="display: none;">
+    <form id="registerForm" method="POST" action="/register">
+        <h2>Register</h2>
+        <h4>Please enter your info into this form and press "Submit data" button</h4>
+        <p>Nickname:</p>
+        <input name='nickname' id='nicknameInput' type="text" required>
+        <p id="username-feedback"></p>
+        <p>Email:</p>
+        <input name='email' type="email" required>
+        <p>Password:</p>
+        <input name='password' type="password" required>
+        <p><input value='Submit data' type='SUBMIT'></p>
+    </form>
+</div>
+{% endblock %}
