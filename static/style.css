@@ -1,22 +1,51 @@
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #fafcff;
+    --text-color: #2a2a2a;
+    --border-color: #909090;
+    --tag-background-color: #219903;
+    --tag-text-color: rgb(0, 0, 0);
+}
+
 table {
-    font-size:          1em;
-    background-color:   #fafcff;
-    border:             1px solid #909090;
-    color:              #2a2a2a;
-    padding:            5px 5px 2px;
-    border-collapse:    collapse;
-    }
-    
-    td, th {
-    border:             thin dotted gray;
-    }
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
 
 .tag {
+    background-color: var(--tag-background-color);
+    color: var(--tag-text-color);
     display: inline-block;
     padding: 5px 10px;
     margin: 2px;
-    border-radius: 20px; /* Makes the tag oval */
-    background-color: #007bff; /* Blue background */
-    color: white; /* White text */
-    cursor: pointer; /* Changes the cursor to a pointer when hovering over the tag */
-}    
+    border-radius: 20px; 
+    cursor: pointer; 
+
+}
+
+#data-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: secondary-color;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

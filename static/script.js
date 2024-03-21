@@ -48,16 +48,15 @@ function populateRow(row, item) {
     row.insertCell(1).innerText = new Date(item.created).toLocaleString(); // Created
 
     // Check if the 'done' field is false or not present
-    if (item.done === false || item.done === undefined) {
+    if (item.done) {
+        row.insertCell(2).innerText = new Date(item.done).toLocaleString()
+    } else {
         // If 'done' is false or not present, insert a cell for the "Mark as done" button
         const doneCell = row.insertCell(2);
         const doneButton = document.createElement('button');
         doneButton.innerText = 'Mark as done';
         doneButton.addEventListener('click', () => markTaskAsDone(item._id));
         doneCell.appendChild(doneButton);
-    } else {
-        // If 'done' is true, insert a cell for the "Done" status
-        row.insertCell(2).innerText = new Date(item.done).toLocaleString()
     }
 
 
@@ -117,12 +116,7 @@ function createNewTodo() {
     }
     const data = { todo: todoText };
     try {
-        fetch("/add_todo", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
+        post("/add_todo", data)
         .then(data => {
             originalData = data;
             populateTable(data);
@@ -133,56 +127,45 @@ function createNewTodo() {
     }
 }
 
+function post(url, data) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json;charset=utf-8' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .catch(error => console.log(error))
+}
+
 function deleteTask(taskId) {
     const data = { id: taskId };
-        fetch("/delete_todo", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
+    post("/delete_todo", data)
+    .then(data => {
         jsonResult = data
         originalData = data;
         populateTable(jsonResult);
-        });
+    });
 }
 
 function markTaskAsDone(taskId) {
     const data = { id: taskId };
-    fetch("/markdone", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: JSON.stringify(data)
-        })
-    .then(response => response.json())
+    post("/markdone", data)
     .then(data => {
         jsonResult = data
         originalData = data;
         populateTable(jsonResult);
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while marking task done.');
-    });
+    
 }
 
 function registerUser(event) {
     event.preventDefault();
     const registerFormData = new FormData(event.target);
     const data = Object.fromEntries(registerFormData.entries());
-    fetch('/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        })
-    .then (response => response.json())
+    post("/register")
     .then (data => {
-        if (!data.success) throw new Error('Network response was not ok');
-        if (data.success) {
+        if (data.message) {
             alert(data.message);
-        } else {
-            alert('Registration failed: ' + data.message);
         }
     })
 }
@@ -194,12 +177,7 @@ function showRegisterModal() {
 function checkUsernameAvailability() {
     const nickname = this.value;
     if (nickname && nickname.length > 2) {
-        fetch('/check-username', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nickname: nickname }),
-        })
-        .then(response => response.json())
+        post('/check-username',  { nickname: nickname })
         .then(data => {
             const feedbackElement = document.getElementById('username-feedback');
             feedbackElement.textContent = data.available ? 'Username is available' : 'Username is taken';
@@ -207,7 +185,7 @@ function checkUsernameAvailability() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while checking username availability.');
+            feedbackElement.textContent = error;
         });
     }
 }
@@ -217,13 +195,7 @@ function addTagsToTodo(tagText, taskId) {
         alert('Please enter at least one valid tag, or several, separated by commas.');
         return;
     }
-    const data = { id: taskId, tag_string: tagText };
-        fetch("/addtag", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
+        post("/addtag", { id: taskId, tag_string: tagText })
         .then(data => {
             const jsonResult = data;
             originalData = jsonResult;
@@ -231,18 +203,12 @@ function addTagsToTodo(tagText, taskId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while checking username availability.');
+            alert('An error occurred while adding tags.');
         });
 }
 
 function clearTagsFromTodo(taskId) {
-    const data = { id: taskId };
-    fetch("/cleartags", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json;charset=utf-8' },
-            body: JSON.stringify(data)
-        })
-    .then(response => response.json())
+    post("/cleartags", { id: taskId })
     .then(data => {
         jsonResult = data
         populateTable(jsonResult);
